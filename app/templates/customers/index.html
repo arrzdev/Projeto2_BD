@@ -9,4 +9,83 @@
   <div class="px-6 pt-10 w-full">
     {{ table.render(customers) }}
   </div>
+
+  <!-- Add Customer Modal-->
+  <dialog id="create_customer_modal" class="modal">
+    <form method="dialog" class="modal-box space-y-4">
+      <div>
+        <label class="label">
+          <span class="label-text">Name</span>
+        </label>
+        <input id="modal_name" type="text" placeholder="ex: Juan" class="input input-bordered w-full max-w-xs" />
+      </div>
+      <div>
+        <label class="label">
+          <span class="label-text">Email</span>
+        </label>
+        <input id="modal_email" type="text" placeholder="ex: juan@tecnico.ulisboa.pt" class="input input-bordered w-full max-w-xs" />
+      </div>
+      <div>
+        <label class="label">
+          <span class="label-text">Phone</span>
+        </label>
+        <input id="modal_phone" type="text" placeholder="ex: 966555444" class="input input-bordered w-full max-w-xs" />
+      </div>
+      <div>
+        <label class="label">
+          <span class="label-text">Address</span>
+        </label>
+        <input id="modal_address" type="text" placeholder="ex: Lab15 - RNL" class="input input-bordered w-full max-w-xs" />
+      </div>
+
+      <div class="modal-action">
+
+        <!-- if there is a button in form, it will close the modal -->
+        <button class="btn" onclick="addCustomer()">Add</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Actions logic -->
+  <script>
+    const addCustomer = () => {
+      //get modal input values
+      const name = document.getElementById("modal_name").value
+      const email = document.getElementById("modal_email").value
+      const phone = document.getElementById("modal_phone").value
+      const address = document.getElementById("modal_address").value  
+
+      console.log(name, email, phone, address)
+
+      //TODO: add toaster to alert user that all fields must be filled
+      if (name === "" || email === "" || phone === "" || address === "") {
+        return
+      }
+    
+      //redirect to add customer endpoint
+      window.location.href = `/customers/add?name=${name}&email=${email}&phone=${phone}&address=${address}`
+    }
+
+    const deleteCustomer = () => {
+      //check if the first checkbox is checked
+      const firstCheckbox = document.querySelector(".checkbox")
+      if (firstCheckbox.checked) {
+        window.location.href = "/customers/delete?all=1"
+      }
+
+      //otherwise, find the checked checkboxes
+      const checkboxes = document.querySelectorAll(".checkbox:checked")
+      //get the customer numbers
+      const customerNumbers = Array.from(checkboxes).map(checkbox => {
+        return checkbox.parentElement.parentElement.parentElement.querySelector("td:nth-child(2)").innerText
+      })
+
+      //TODO: create toaster to alert user that no customers were selected
+      if (customerNumbers.length === 0) {
+        return
+      }
+      
+      window.location.href = `/customers/delete?ids=${customerNumbers}`
+    }
+  </script>
 {% endblock %}

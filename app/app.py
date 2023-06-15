@@ -20,7 +20,7 @@ from random import randint
 DATABASE_URL = os.environ.get("DATABASE_URL", "postgres://postgres:postgres@postgres/postgres")
 FETCH_ONE = "one"
 FETCH_ALL = "all"
-INSERT = "insert"
+INSERT_REMOVE = "insert"
 
 pool = ConnectionPool(conninfo=DATABASE_URL)
 # the pool starts connecting immediately.
@@ -47,7 +47,7 @@ dictConfig(
 app = Flask(__name__)
 log = app.logger
 
-def execute_query(query, args=(), action=INSERT):
+def execute_query(query, args=(), action=INSERT_REMOVE):
   '''
   Execute a query and return the result.
   '''
@@ -56,7 +56,7 @@ def execute_query(query, args=(), action=INSERT):
     with pool.connection() as conn:
       with conn.cursor(row_factory=namedtuple_row) as cur:
         cur.execute(query, args)
-        if action != INSERT:
+        if action != INSERT_REMOVE:
           result = cur.fetchall() if action == FETCH_ALL else cur.fetchone()
   except:
     log.exception("Error executing query: %s", query)
@@ -72,9 +72,9 @@ def index():
 @app.route("/customers", methods=["GET"])
 def customer_index():
   #get filter arg from request
-  name_q = request.args.get("q")
+  name_q = request.args.get("q", "")
 
-  if name_q is None or name_q == "":
+  if name_q == "":
     #run query without filter
     query = "SELECT * FROM customer"
     args = ()
@@ -90,6 +90,7 @@ def customer_index():
     customers=customers
   )
 
+# SHOW CUSTOMER
 @app.route("/customers/<int:customer_id>", methods=["GET"])
 def customer_show(customer_id):
   customer = execute_query(
@@ -99,6 +100,7 @@ def customer_show(customer_id):
   )
   return jsonify(customer)
 
+# ADD CUSTOMER
 @app.route("/customers/add", methods=["GET"])
 def customer_add():
   #/customers/add?name=joana&email=joana@wtf.pt&phone=969696969&adress=Manhica
@@ -116,9 +118,40 @@ def customer_add():
   args = (cust_no, name, email, phone, address)
 
   #insert customer into db
-  sucessfull = execute_query(query, args, action=INSERT)
+  sucessfull = execute_query(query, args, action=INSERT_REMOVE)
   # if not sucessfull:
   #   flash("Error inserting customer")
+  
+  #render main_page
+  return redirect(url_for("customer_index"))
+
+# REMOVE CUSTOMER
+@app.route("/customers/delete", methods=["GET"])
+def customer_remove():
+  delete_all = int(request.args.get("all", 0))
+  customer_ids = request.args.get("ids", "")
+
+  # if customer_ids is False and customer_ids == []:
+  #   flash("Please select a customer to remove")
+  #   return redirect(url_for("customer_index"))
+
+  #if delete_all is true, delete all customers
+  if delete_all == 1:
+    query = "DELETE FROM customer"
+    args = ()
+  else:
+    #parse ids
+    customer_ids = tuple(map(int, customer_ids.split(",")))
+    placeholders = ", ".join(["%s"] * len(customer_ids))
+
+    query = f"DELETE FROM customer WHERE cust_no IN ({placeholders})"
+    args = customer_ids
+
+  #execute query
+  sucessfull = execute_query(query, args, action=INSERT_REMOVE)
+
+  # if not sucessfull:
+  #   flash("Error deleting customer(s)")
   
   #render main_page
   return redirect(url_for("customer_index"))
