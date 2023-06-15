@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% import "components/table.html" as table %}
+
+{% block header %}
+{% endblock %}
+
+{% block content %}
+  <!-- Render Customers table -->
+  <div class="px-6 pt-10 w-full">
+    {{ table.render(customers) }}
+  </div>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% import "components/navbar.html" as navbar %}
+
+<!doctype html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}{% endblock %}</title>
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@3.1.0/dist/full.css" rel="stylesheet" type="text/css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+</head>
+<body>
+  <!-- NAVBAR -->
+  {{ navbar.render(navbar_text, current_q) }}
+
+  <section class="page">
+    <!-- extended headers go here -->
+    <header>{% block header %}{% endblock %}</header>
+
+    <!-- flash messages -->
+    {% for message in get_flashed_messages() %}
+    <div class="flash">{{ message }}</div>
+    {% endfor %}
+
+    <!-- extended page goes here -->
+    {% block content %}{% endblock %}
+  </section>
+</body>
+<script>
+  //used to change page parameters
+  const changeParameter = (key, value) => {
+    let urlParams = new URLSearchParams(location.search.substr(1));
+    urlParams.set(key, value);
+    location.search = urlParams.toString();
+  }
+</script>
