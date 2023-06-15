@@ -67,7 +67,11 @@ def execute_query(query, args=(), action=INSERT_REMOVE):
 
 @app.route("/", methods=["GET"])
 def index():
-  return render_template("index.html")
+  #render customers page by default
+  return redirect(url_for("customer_index"))
+
+
+########################################################
 
 @app.route("/customers", methods=["GET"])
 def customer_index():
@@ -83,22 +87,14 @@ def customer_index():
     args = (name_q, )
 
   customers = execute_query(query, args, action=FETCH_ALL)
+
   return render_template(
     "/customers/index.html",
     navbar_text="Customers", 
     current_q=name_q,
+    search_label="Search by name..",
     customers=customers
   )
-
-# SHOW CUSTOMER
-@app.route("/customers/<int:customer_id>", methods=["GET"])
-def customer_show(customer_id):
-  customer = execute_query(
-    "SELECT * FROM customer WHERE customer_id = %s",
-    (customer_id, ),
-    action=FETCH_ONE
-  )
-  return jsonify(customer)
 
 # ADD CUSTOMER
 @app.route("/customers/add", methods=["GET"])
@@ -155,6 +151,108 @@ def customer_remove():
   
   #render main_page
   return redirect(url_for("customer_index"))
+
+########################################################
+
+@app.route("/products", methods=["GET"])
+def product_index():
+  #get filter arg from request
+  name_q = request.args.get("q", "") #sku / name
+
+  if name_q == "":
+    #run query without filter
+    query = "SELECT * FROM product"
+    args = ()
+  else:
+    query = "SELECT * FROM product WHERE name ILIKE %s OR sku ILIKE %s"
+    args = (name_q, name_q)
+
+  products = execute_query(query, args, action=FETCH_ALL)
+  return render_template(
+    "/products/index.html",
+    navbar_text="Products", 
+    current_q=name_q,
+    search_label="Search by name or sku..",
+    products=products
+  )
+
+
+# ADD PRODUCT
+@app.route("/products/add", methods=["GET"])
+def product_add():
+  sku = request.args.get("sku", "debug")
+  name = request.args.get("name", "debug")
+  description = request.args.get("description", "debug")
+  price = request.args.get("price", 0)
+  ean = request.args.get("ean", 0)
+
+  # if sku is None or name is None or description is None or price is None or ean is None:
+    # flash("Please fill out all fields")
+
+  #create query
+  query = "INSERT INTO product (sku, name, description, price, ean) VALUES (%s, %s, %s, %s, %s)"
+  args = (sku, name, description, price, ean)
+
+  #insert customer into db
+  sucessfull = execute_query(query, args, action=INSERT_REMOVE)
+  # if not sucessfull:
+  #   flash("Error inserting customer")
+  
+  #render main_page
+  return redirect(url_for("product_index"))
+
+# REMOVE CUSTOMER
+@app.route("/products/delete", methods=["GET"])
+def product_remove():
+  delete_all = int(request.args.get("all", 0))
+  product_ids = request.args.get("ids", "")
+
+  # if product_ids == "":
+  #   flash("Please select a product to remove")
+  #   return redirect(url_for("product_index"))
+
+  #if delete_all is true, delete all customers
+  if delete_all == 1:
+    query = "DELETE FROM product"
+    args = ()
+  else:
+    #parse ids
+    product_ids = tuple(map(int, product_ids.split(",")))
+    placeholders = ", ".join(["%s"] * len(product_ids))
+
+    query = f"DELETE FROM product WHERE cust_no IN ({placeholders})"
+    args = product_ids
+
+  #execute query
+  sucessfull = execute_query(query, args, action=INSERT_REMOVE)
+
+  # if not sucessfull:
+  #   flash("Error deleting customer(s)")
+  
+  #render main_page
+  return redirect(url_for("product_index"))
+
+@app.route("/products/update", methods=["GET"])
+def product_update():
+  skus = request.args.get("skus", "")
+  skus = tuple(skus.split(","))
+
+  descriptions = request.args.get("descriptions", "")
+  descriptions = tuple(descriptions.split(","))
+
+  prices = request.args.get("prices", "")
+  prices = tuple(prices.split(","))
+
+  #update products that match the sku with the new description and price
+  for sku, description, price in zip(skus, descriptions, prices):
+    query = "UPDATE product SET description = %s, price = %s WHERE sku = %s"
+    args = (description, price, sku)
+    sucessfull = execute_query(query, args, action=INSERT_REMOVE)
+
+    # if not sucessfull:
+    #   flash("Error updating product(s)")
+
+  return redirect(url_for("product_index"))
 
 @app.route("/ping", methods=("GET",))
 def ping():

@@ -1,0 +1,287 @@
+{% extends 'base.html' %}
+{% import "components/table.html" as table %}
+{% import "components/button.html" as button%}
+
+
+{% block header %}
+{% endblock %}
+
+{% block content %}
+<div class="px-6 pt-10 w-full">
+  <div class="flex mb-4 space-x-3">
+    <!-- render add button -->
+    {{button.render(
+      "Add",
+      "M12 4.5v15m7.5-7.5h-15",
+      "create_product_modal.showModal()"
+      )}}
+      
+      <!-- render delete button -->
+      {{button.render(
+        "Delete",
+        "M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244
+        2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114
+      1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32
+      0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0",
+      "deleteProduct()"
+      )}}
+
+      <!-- render edit button -->
+      {{button.render(
+        "Edit",
+        "M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0
+        011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0
+        015.25 6H10",
+        "createEditProductModal()"
+      )}}
+    </div>
+
+    <!-- Render Customers table -->
+    {{ table.render(products, [
+      "SKU",
+      "Name",
+      "Description",
+      "Price",
+      "EAN"
+    ]) }}
+  </div>
+  
+  <!-- Add Product Modal -->
+  <dialog id="create_product_modal" class="modal">
+    <form method="dialog" class="modal-box space-y-4">
+      <h1> Add </h1>
+      <div>
+        <label class="label">
+          <span class="label-text">SKU</span>
+        </label>
+        <input id="modal_sku" type="text" placeholder="ex: AE8H" class="input input-bordered w-full max-w-xs" />
+      </div>
+      <div>
+        <label class="label">
+          <span class="label-text">Name</span>
+        </label>
+        <input id="modal_name" type="text" placeholder="ex: Vintage Shirt" class="input input-bordered w-full max-w-xs" />
+      </div>
+      <div>
+        <label class="label">
+          <span class="label-text">Description</span>
+        </label>
+        <input id="modal_description" type="text" placeholder="ex: non stretchable shirt" class="input input-bordered w-full max-w-xs" />
+      </div>
+      <div>
+        <label class="label">
+          <span class="label-text">Price</span>
+        </label>
+        <input id="modal_price" type="text" placeholder="ex: 29,99" class="input input-bordered w-full max-w-xs" />
+      </div>
+      <div>
+        <label class="label">
+          <span class="label-text">EAN</span>
+        </label>
+        <input id="modal_ean" type="text" placeholder="ex: 11206272090" class="input input-bordered w-full max-w-xs" />
+      </div>
+      <div class="modal-action">
+
+        <!-- if there is a button in form, it will close the modal -->
+        <button class="btn" onclick="addProduct()">Add</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Actions logic -->
+  <script>
+    const createEditProductModal = () => {
+      //if edit product modal exists remove it from the DOM
+      const editProductModal = document.getElementById("edit_product_modal")
+      if (editProductModal) {
+        editProductModal.remove()
+      }
+
+      const checkboxes = document.querySelectorAll(".checkbox")
+      const rows = document.querySelectorAll("tr")
+
+      var toEditRows = []
+      //check if the first checkbox is checked
+      if (checkboxes[0].checked) {
+        toEditRows = Array.from(rows).slice(1, -1)
+        console.log(toEditRows)
+      }
+      else {
+        toEditRows = Array.from(rows).slice(1, -1).filter((row, index) => {
+          return checkboxes[index + 1].checked
+        })
+      }
+
+      //if no product is selected, return
+      if (toEditRows.length === 0) {
+        return
+      }
+
+      // Create the dialog element
+      var dialog = document.createElement('dialog');
+      dialog.id = 'edit_product_modal';
+      dialog.className = 'modal';
+
+      // Create the form element
+      var form = document.createElement('form');
+      form.method = 'dialog';
+      form.className = 'modal-box space-y-4';
+
+      // Iterate over the rows
+      toEditRows.forEach(function (row) {
+        const sku = row.children[1].textContent;
+        const description = row.children[3].textContent;
+        const price = row.children[4].textContent;
+
+        // Create the div container
+        var container = document.createElement('div');
+
+        // Create the heading element
+        var heading = document.createElement('h1');
+        heading.id = 'modal_sku';
+        heading.textContent = 'Product ' + sku;
+
+        // Create the description input element
+        var descriptionLabel = document.createElement('label');
+        descriptionLabel.className = 'label';
+
+        var descriptionLabelText = document.createElement('span');
+        descriptionLabelText.className = 'label-text';
+        descriptionLabelText.textContent = 'Description';
+
+        var descriptionInput = document.createElement('input');
+        descriptionInput.id = 'modal_description';
+        descriptionInput.value = description;
+        descriptionInput.type = 'text';
+        descriptionInput.placeholder = 'ex: non stretchable shirt';
+        descriptionInput.className = 'input input-bordered w-full max-w-xs';
+
+        descriptionLabel.appendChild(descriptionLabelText);
+        descriptionLabel.appendChild(descriptionInput);
+
+        // Create the price input element
+        var priceLabel = document.createElement('label');
+        priceLabel.className = 'label';
+
+        var priceLabelText = document.createElement('span');
+        priceLabelText.className = 'label-text';
+        priceLabelText.textContent = 'Price';
+
+        var priceInput = document.createElement('input');
+        priceInput.id = 'modal_price';
+        priceInput.value = price;
+        priceInput.type = 'text';
+        priceInput.placeholder = 'ex: 29,99';
+        priceInput.className = 'input input-bordered w-full max-w-xs';
+
+        priceLabel.appendChild(priceLabelText);
+        priceLabel.appendChild(priceInput);
+
+        // Append all elements to the container
+        container.appendChild(heading);
+        container.appendChild(descriptionLabel);
+        container.appendChild(priceLabel);
+
+        // Append the container to the form
+        form.appendChild(container);
+      });
+
+      // Create the modal action div
+      var modalAction = document.createElement('div');
+      modalAction.className = 'modal-action';
+
+      // Create the button element
+      var button = document.createElement('button');
+      button.className = 'btn';
+      button.textContent = 'Edit';
+      button.onclick = editProduct;
+
+      // Append the button to the modal action div
+      modalAction.appendChild(button);
+
+      // Append the modal action div to the form
+      form.appendChild(modalAction);
+
+      // Append the form to the dialog
+      dialog.appendChild(form);
+
+      // Append the dialog to the body
+      document.body.appendChild(dialog);
+
+      // Open the dialog
+      dialog.showModal();
+    }
+
+    const editProduct = () => {
+      //get edit modal input values
+      const skuArray = [];
+      const descriptionArray = [];
+      const priceArray = [];
+
+      // Get the input values from the modal
+      const modalSkuInputs = document.querySelectorAll('#edit_product_modal #modal_sku');
+      const modalDescriptionInputs = document.querySelectorAll('#edit_product_modal #modal_description');
+      const modalPriceInputs = document.querySelectorAll('#edit_product_modal #modal_price');
+
+      // Iterate over the inputs
+      modalDescriptionInputs.forEach(function (modalDescriptionInput, index) {
+        const description = modalDescriptionInput.value;
+        const sku = modalSkuInputs[index].innerText.split(" ")[1];
+        const price = modalPriceInputs[index].value;
+
+        // Push the values into the arrays
+        skuArray.push(sku);
+        descriptionArray.push(description);
+        priceArray.push(price);
+      });
+
+      window.location.href = `/products/update?skus=${skuArray}&descriptions=${descriptionArray}&prices=${priceArray}`
+    }
+
+    const addProduct = () => {
+      //get modal input values
+      const sku = document.getElementById("modal_sku").value
+      const name = document.getElementById("modal_name").value
+      const description = document.getElementById("modal_description").value
+      const price = document.getElementById("modal_price").value
+      const ean = document.getElementById("modal_ean").value
+
+      if (!sku || !name || !description || !price || !ean) {
+        return
+      }
+      
+      // if (!Number.isInteger(price)) {
+      //   return
+      // }
+
+      // if (!Number.isInteger(ean)) {
+      //   return
+      // }
+    
+      //redirect to add customer endpoint
+      window.location.href = `/products/add?sku=${sku}&name=${name}&description=${description}&price=${price}&ean=${ean}`
+    }
+
+    const deleteProduct = () => {
+      //check if the first checkbox is checked
+      const firstCheckbox = document.querySelector(".checkbox")
+      if (firstCheckbox.checked) {
+        window.location.href = "/products/delete?all=1"
+      }
+
+      //otherwise, find the checked checkboxes
+      const checkboxes = document.querySelectorAll(".checkbox:checked")
+      //get the customer numbers
+      const productNumbers = Array.from(checkboxes).map(checkbox => {
+        return checkbox.parentElement.parentElement.parentElement.querySelector("td:nth-child(2)").innerText
+      })
+
+      //TODO: create toaster to alert user that no customers were selected
+      if (productNumbers.length === 0) {
+        return
+      }
+      
+      window.location.href = `/products/delete?ids=${productNumbers}`
+    }
+  </script>
+{% endblock %}

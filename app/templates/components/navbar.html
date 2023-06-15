@@ -1,6 +1,6 @@
 {% import "components/circleButton.html" as cicleButton%}
 
-{% macro render(navbar_text, current_q) %}
+{% macro render(navbar_text, current_q, search_label) %}
 <nav id="navbar">
   <div class="navbar bg-base-100">
     <div class="navbar-start">
@@ -23,7 +23,7 @@
     <!-- Search bar -->
     <div class="navbar-end">
       <div class="form-control relative">
-        <input type="text" placeholder="Search" value="{{current_q}}" id="search_bar" class="input input-bordered w-24 md:w-auto pr-10"
+        <input type="text" placeholder="{{search_label}}" value="{{current_q}}" id="search_bar" class="input input-bordered w-24 md:w-auto pr-10"
           onchange="changeParameter('q', this.value)">
         <span class="search-icon" onclick="changeParameter('q', '')">
           {{cicleButton.render('', 'M6 18L18 6M6 6l12 12')}}
