@@ -1,0 +1,50 @@
+version: '3'
+
+volumes:
+  pgdata: {}
+  pgadmindata: {}
+
+services:
+  postgres:
+    image: postgres:15.3
+    restart: always
+    volumes:
+      - ./scripts/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+      - pgdata:/var/lib/postgresql/data:Z
+      - ./docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d/
+      - ./data:/tmp/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    networks:
+      - app-network
+
+  app:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    volumes:
+      - ./app:/app
+    depends_on:
+      - postgres
+    environment:
+      FLASK_APP: app
+      FLASK_ENV: development
+      FLASK_DEBUG: 1
+    ports:
+      - "5001:5001"
+    networks:
+      - app-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m" # Maximum log file size
+        max-file: "3"   # Maximum number of log files
+    tty: true
+
+networks:
+  app-network:
+    driver: bridge
