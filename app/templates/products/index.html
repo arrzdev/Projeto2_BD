@@ -52,7 +52,7 @@
   <!-- Add Product Modal -->
   <dialog id="create_product_modal" class="modal">
     <form method="dialog" class="modal-box space-y-4">
-      <h1> Add </h1>
+      <h1>Add</h1>
       <div>
         <label class="label">
           <span class="label-text">SKU</span>
@@ -127,21 +127,22 @@
 
       // Create the form element
       var form = document.createElement('form');
-      form.method = 'dialog';
       form.className = 'modal-box space-y-4';
 
       // Iterate over the rows
-      toEditRows.forEach(function (row) {
+      Array.from(rows).slice(1, -1).forEach(function (row) {
         const sku = row.children[1].textContent;
         const description = row.children[3].textContent;
         const price = row.children[4].textContent;
 
-        // Create the div container
-        var container = document.createElement('div');
+        // Create the div container for each product
+        var productDiv = document.createElement('div');
+        productDiv.className = 'mb-10 space-y-1';
 
         // Create the heading element
         var heading = document.createElement('h1');
         heading.id = 'modal_sku';
+        heading
         heading.textContent = 'Product ' + sku;
 
         // Create the description input element
@@ -160,7 +161,6 @@
         descriptionInput.className = 'input input-bordered w-full max-w-xs';
 
         descriptionLabel.appendChild(descriptionLabelText);
-        descriptionLabel.appendChild(descriptionInput);
 
         // Create the price input element
         var priceLabel = document.createElement('label');
@@ -178,15 +178,16 @@
         priceInput.className = 'input input-bordered w-full max-w-xs';
 
         priceLabel.appendChild(priceLabelText);
-        priceLabel.appendChild(priceInput);
 
-        // Append all elements to the container
-        container.appendChild(heading);
-        container.appendChild(descriptionLabel);
-        container.appendChild(priceLabel);
+        // Append all elements to the product div
+        productDiv.appendChild(heading);
+        productDiv.appendChild(descriptionLabel);
+        productDiv.appendChild(descriptionInput);
+        productDiv.appendChild(priceLabel);
+        productDiv.appendChild(priceInput);
 
-        // Append the container to the form
-        form.appendChild(container);
+        // Append the product div to the form
+        form.appendChild(productDiv);
       });
 
       // Create the modal action div
