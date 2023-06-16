@@ -1,0 +1,26 @@
+{% macro render(current_page, max_page) %}
+<div class="join">
+  <button class="join-item btn" onclick="previousPage()">«</button>
+  <button class="join-item btn">Page {{current_page}}</button>
+  <button class="join-item btn" onclick="nextPage()">»</button>
+</div>
+
+<script>
+
+  const nextPage = () => {
+    const page = Number('{{current_page}}')
+    const max_page = Number('{{max_page}}')
+    if (page != max_page){
+      changeParameter('page', page + 1)
+    }
+  }
+
+  const previousPage = () => {
+    const page = Number('{{current_page}}')
+    if (page > 1){
+      changeParameter('page', page - 1)
+    }
+  }
+
+</script>
+{% endmacro %}

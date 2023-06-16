@@ -77,6 +77,7 @@ def index():
 def customer_index():
   #get filter arg from request
   name_q = request.args.get("q", "")
+  page = int(request.args.get("page", 1))
 
   if name_q == "":
     #run query without filter
@@ -88,10 +89,16 @@ def customer_index():
 
   customers = execute_query(query, args, action=FETCH_ALL)
 
+  #display 8 customers per page
+  max_page = (len(customers) // 8) + 1
+  customers = customers[(page-1)*8:page*8]
+
   return render_template(
     "/customers/index.html",
     navbar_text="Customers", 
     current_q=name_q,
+    current_page=page,
+    max_page=max_page,
     search_label="Search by name..",
     customers=customers
   )
@@ -158,6 +165,7 @@ def customer_remove():
 def product_index():
   #get filter arg from request
   name_q = request.args.get("q", "") #sku / name
+  page = int(request.args.get("page", 1))
 
   if name_q == "":
     #run query without filter
@@ -168,10 +176,17 @@ def product_index():
     args = (name_q, name_q)
 
   products = execute_query(query, args, action=FETCH_ALL)
+
+  #display 8 products per page
+  max_page = (len(products) // 8) + 1
+  products = products[(page-1)*8:page*8]
+
   return render_template(
     "/products/index.html",
     navbar_text="Products", 
     current_q=name_q,
+    current_page=page,
+    max_page=max_page,
     search_label="Search by name or sku..",
     products=products
   )
