@@ -68,13 +68,13 @@ def execute_query(query, args=(), action=INSERT_REMOVE):
 @app.route("/", methods=["GET"])
 def index():
   #render customers page by default
-  return redirect(url_for("customer_index"))
+  return redirect(url_for("customers_index"))
 
 
 ########################################################
 
 @app.route("/customers", methods=["GET"])
-def customer_index():
+def customers_index():
   #get filter arg from request
   name_q = request.args.get("q", "")
   page = int(request.args.get("page", 1))
@@ -90,7 +90,9 @@ def customer_index():
   customers = execute_query(query, args, action=FETCH_ALL)
 
   #display 8 customers per page
-  max_page = (len(customers) // 8) + 1
+  max_page = (len(customers) // 8)
+  if len(customers) % 8 != 0:
+    max_page += 1
   customers = customers[(page-1)*8:page*8]
 
   return render_template(
@@ -105,7 +107,7 @@ def customer_index():
 
 # ADD CUSTOMER
 @app.route("/customers/add", methods=["GET"])
-def customer_add():
+def customers_add():
   #/customers/add?name=joana&email=joana@wtf.pt&phone=969696969&adress=Manhica
   cust_no = randint(0, 999999)
   name = request.args.get("name", "debug")
@@ -126,17 +128,17 @@ def customer_add():
   #   flash("Error inserting customer")
   
   #render main_page
-  return redirect(url_for("customer_index"))
+  return redirect(url_for("customers_index"))
 
 # REMOVE CUSTOMER
 @app.route("/customers/delete", methods=["GET"])
-def customer_remove():
+def customers_remove():
   delete_all = int(request.args.get("all", 0))
   customer_ids = request.args.get("ids", "")
 
   # if customer_ids is False and customer_ids == []:
   #   flash("Please select a customer to remove")
-  #   return redirect(url_for("customer_index"))
+  #   return redirect(url_for("customers_index"))
 
   #if delete_all is true, delete all customers
   if delete_all == 1:
@@ -157,12 +159,12 @@ def customer_remove():
   #   flash("Error deleting customer(s)")
   
   #render main_page
-  return redirect(url_for("customer_index"))
+  return redirect(url_for("customers_index"))
 
 ########################################################
 
 @app.route("/products", methods=["GET"])
-def product_index():
+def products_index():
   #get filter arg from request
   name_q = request.args.get("q", "") #sku / name
   page = int(request.args.get("page", 1))
@@ -178,7 +180,9 @@ def product_index():
   products = execute_query(query, args, action=FETCH_ALL)
 
   #display 8 products per page
-  max_page = (len(products) // 8) + 1
+  max_page = (len(products) // 8)
+  if len(products) % 8 != 0:
+    max_page += 1
   products = products[(page-1)*8:page*8]
 
   return render_template(
@@ -194,7 +198,7 @@ def product_index():
 
 # ADD PRODUCT
 @app.route("/products/add", methods=["GET"])
-def product_add():
+def products_add():
   random_no = randint(0, 999999)
   sku = request.args.get("sku", f"d-{random_no}")
   name = request.args.get("name", f"n-{random_no}")
@@ -215,17 +219,17 @@ def product_add():
   #   flash("Error inserting customer")
   
   #render main_page
-  return redirect(url_for("product_index"))
+  return redirect(url_for("products_index"))
 
 # REMOVE CUSTOMER
 @app.route("/products/delete", methods=["GET"])
-def product_remove():
+def products_remove():
   delete_all = int(request.args.get("all", 0))
   product_ids = request.args.get("ids", "")
 
   # if product_ids == "":
   #   flash("Please select a product to remove")
-  #   return redirect(url_for("product_index"))
+  #   return redirect(url_for("products_index"))
 
   #if delete_all is true, delete all customers
   if delete_all == 1:
@@ -246,10 +250,10 @@ def product_remove():
   #   flash("Error deleting customer(s)")
   
   #render main_page
-  return redirect(url_for("product_index"))
+  return redirect(url_for("products_index"))
 
 @app.route("/products/update", methods=["GET"])
-def product_update():
+def products_update():
   skus = request.args.get("skus", "")
   skus = tuple(skus.split(","))
 
@@ -268,7 +272,7 @@ def product_update():
     # if not sucessfull:
     #   flash("Error updating product(s)")
 
-  return redirect(url_for("product_index"))
+  return redirect(url_for("products_index"))
 
 @app.route("/ping", methods=("GET",))
 def ping():
