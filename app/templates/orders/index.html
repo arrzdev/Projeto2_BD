@@ -36,47 +36,51 @@
   <!-- Actions logic -->
   <script>
     const checkout = () => {
-      //check if the first checkbox is checked
-      const firstCheckbox = document.querySelector(".checkbox")
+      // Check if the first checkbox is checked
+      const firstCheckbox = document.querySelector(".checkbox");
       if (firstCheckbox.checked) {
-        console.log("Cannot checkout multiple orders")
-        return
+        customAlert("Cannot checkout multiple orders");
+        return;
       }
 
-      //otherwise, find the checked checkboxes
-      const checkboxes = document.querySelectorAll(".checkbox:checked")
+      // Otherwise, find the checked checkboxes
+      const checkboxes = document.querySelectorAll(".checkbox:checked");
 
-      //get the order numbers
+      // Get the order numbers
       const orderNumbers = Array.from(checkboxes).map(checkbox => {
-        return checkbox.parentElement.parentElement.parentElement.querySelector("td:nth-child(2)").innerText
-      })
+        return checkbox.parentElement.parentElement.parentElement.querySelector("td:nth-child(2)").innerText;
+      });
 
-      //get the customer numbers
+      // Get the customer numbers
       const customerNumbers = Array.from(checkboxes).map(checkbox => {
-        return checkbox.parentElement.parentElement.parentElement.querySelector("td:nth-child(3)").innerText
-      })
+        return checkbox.parentElement.parentElement.parentElement.querySelector("td:nth-child(3)").innerText;
+      });
 
-      //get status
+      // Get status
       const statuses = Array.from(checkboxes).map(checkbox => {
-        return checkbox.parentElement.parentElement.parentElement.querySelector("td:nth-child(5)").innerText
-      })
+        return checkbox.parentElement.parentElement.parentElement.querySelector("td:nth-child(5)").innerText;
+      });
 
-
-      //TODO: create toaster to alert user that no customers were selected
+      // TODO: Create toaster to alert the user that no customers were selected
       if (orderNumbers.length !== 1) {
-        return
+        // Custom log message when no customers are selected or multiple orders are selected
+        customAlert("Please select a single order to checkout");
+        return;
       }
 
-      const orderNumber = orderNumbers[0]
-      const customerNumber = customerNumbers[0]
-      const status = statuses[0]
+      const orderNumber = orderNumbers[0];
+      const customerNumber = customerNumbers[0];
+      const status = statuses[0];
 
       if (status === "Paid") {
-        console.log("Cannot checkout paid order")
-        return
+        // Custom log message when attempting to checkout a paid order
+        customAlert("Cannot checkout a paid order");
+        return;
       }
 
-      window.location.href = `/order?order_no=${orderNumber}&cust_no=${customerNumber}`
+      // Redirect the user to the order page
+      window.location.href = `/order?order_no=${orderNumber}&cust_no=${customerNumber}`;
     };
   </script>
+
 {% endblock %}

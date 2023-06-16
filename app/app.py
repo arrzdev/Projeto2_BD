@@ -298,22 +298,12 @@ def products_remove():
         log.exception("Error deleting customer")
         # Rollback the transaction
         conn.rollback()
-  if delete_all == 1:
-    query = "DELETE FROM product"
-    args = ()
-  else:
-    #parse ids
-    product_ids = tuple(product_ids.split(","))
-    placeholders = ", ".join(["%s"] * len(product_ids))
-
-    query = f"DELETE FROM product WHERE sku IN ({placeholders})"
-    args = product_ids
-
+  
   #execute query
   sucessfull = execute_query(query, args, action=INSERT_REMOVE)
 
-  # if not sucessfull:
-  #   flash("Error deleting customer(s)")
+  if not sucessfull:
+    log.exception("Error deleting customer(s)")
   
   #render main_page
   return redirect(url_for("products_index"))

@@ -96,6 +96,25 @@
       const sku = document.getElementById("modal_sku").value
       const date = document.getElementById("modal_date").value
 
+      //check if every input is filled
+      if (!tin || !name || !address || !sku || !date) {
+        customAlert("All fields must be filled.")
+        return
+      }
+
+      //check if tin is a number
+      if (isNaN(tin)) {
+        customAlert("Tin must be a number")
+        return
+      }
+
+      //check if date is valid (YYYY-MM-DD)
+      const dateRegex = /^\d{4}-\d{2}-\d{2}$/
+      if (!dateRegex.test(date)) {
+        customAlert("Date must be in YYYY-MM-DD format")
+        return
+      }
+
       window.location.href = `/suppliers/add?tin=${tin}&name=${name}&address=${address}&sku=${sku}&date=${date}`
     }
 

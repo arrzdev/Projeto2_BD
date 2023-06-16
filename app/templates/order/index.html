@@ -98,7 +98,7 @@
     const cust_no = Number(document.getElementById('selectedCustomer').innerText);
 
     if (!cust_no) {
-      // alert("Please select a customer first!");
+      customAlert("You must select a customer before placing an order!");
       return;
     }
 
@@ -112,8 +112,20 @@
       // return quantity can be inside an input or just a td
       return Number(quantity.querySelector('input') ? quantity.querySelector('input').value : quantity.innerText);
     })
-    
+
+    // Validate order details
+    if (skus.length === 0) {
+      customAlert("Order must contain at least one product!");
+      return;
+    }
+
+    if (quantities.some(qty => qty <= 0)) {
+      customAlert("Order quantity must be greater than zero for all products!");
+      return;
+    }
+
     window.location.href = `/order/place?cust_no=${cust_no}&skus=${skus}&quantities=${quantities}`;
+
   }
 
   const payOrder = () => {
@@ -123,7 +135,15 @@
     //get cust_no
     const cust_no = Number(document.getElementById('selectedCustomer').innerText);
 
-    console.log(order_no, cust_no)
+    if (!order_no) {
+      customAlert("Order number not found!");
+      return;
+    }
+
+    if (!cust_no) {
+      customAlert("You must select a customer first!");
+      return;
+    }
 
     window.location.href = `/order/pay?order_no=${order_no}&cust_no=${cust_no}`;
   }

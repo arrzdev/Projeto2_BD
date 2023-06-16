@@ -1,6 +1,7 @@
 {% import "components/navbar.html" as navbar %}
-
 <!doctype html>
+<html class="h-full">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,22 +10,37 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
 </head>
-<body>
+
+<body class="flex flex-col h-full">
   <!-- NAVBAR -->
   {{ navbar.render(navbar_text, current_q, search_label, search_available)}}
 
-  <section class="page">
+  <section class="flex-1">
     <!-- extended headers go here -->
     <header>{% block header %}{% endblock %}</header>
 
     <!-- flash messages -->
-    {% for message in get_flashed_messages() %}
-    <div class="flash">{{ message }}</div>
-    {% endfor %}
+    <!-- Open the modal using ID.showModal() method -->
+    <dialog id="alert_modal" class="modal">
+      <form method="dialog" class="modal-box">
+        <h3 class="font-bold text-lg">Alert!</h3>
+        <p class="py-4" id="alert_text">Press ESC key or click the button below to close</p>
+        <div class="modal-action">
+          <!-- if there is a button in form, it will close the modal -->
+          <button class="btn">Close</button>
+        </div>
+      </form>
+    </dialog>
 
     <!-- extended page goes here -->
     {% block content %}{% endblock %}
   </section>
+
+  <footer class="footer footer-center p-4 bg-base-300 text-base-content">
+    <div>
+      <p>André Santos - 103597 | </p>
+    </div>
+  </footer>
 </body>
 <script>
   //used to change page parameters
@@ -33,4 +49,19 @@
     urlParams.set(key, value);
     location.search = urlParams.toString();
   }
+
+  const customAlert = (message) => {
+    //close all dialogs
+    const dialogs = document.querySelectorAll("dialog")
+    dialogs.forEach(dialog => dialog.close())
+
+    //set message
+    document.getElementById("alert_text").innerText = message
+
+    //open modal
+    const alertModal = document.getElementById("alert_modal")
+    alertModal.showModal()
+  }
 </script>
+
+</html>

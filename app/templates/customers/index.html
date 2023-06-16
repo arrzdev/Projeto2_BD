@@ -82,32 +82,35 @@
 
   <!-- Actions logic -->
   <script>
+    // Add Customer function
     const addCustomer = () => {
-      //get modal input values
-      const name = document.getElementById("modal_name").value
-      const email = document.getElementById("modal_email").value
-      const phone = document.getElementById("modal_phone").value
-      const address = document.getElementById("modal_address").value  
+      const name = document.getElementById('modal_name').value;
+      const email = document.getElementById('modal_email').value;
+      const phone = document.getElementById('modal_phone').value;
+      const address = document.getElementById('modal_address').value;
 
-      console.log(name, email, phone, address)
-
-      //TODO: add toaster to alert user that all fields must be filled
       if (name === "" || email === "" || phone === "" || address === "") {
-        return
+        customAlert("All fields must be filled.");
+        return;
       }
 
-      if (!email.includes("@")) {
-        return
+      // Regular expression for email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        customAlert("Invalid email address.");
+        return;
       }
 
-      if (phone.length !== 9 && !Number.isInteger(Number(phone))) {
-        return
+      if (phone.length !== 9 || isNaN(Number(phone))) {
+        customAlert("Invalid phone number.");
+        return;
       }
-    
-      //redirect to add customer endpoint
-      window.location.href = `/customers/add?name=${name}&email=${email}&phone=${phone}&address=${address}`
-    }
 
+      // Redirect to add customer endpoint
+      window.location.href = `/customers/add?name=${name}&email=${email}&phone=${phone}&address=${address}`;
+    };
+
+    // Delete Customer function
     const deleteCustomer = () => {
       //check if the first checkbox is checked
       const firstCheckbox = document.querySelector(".checkbox")
@@ -115,18 +118,18 @@
         window.location.href = "/customers/delete?all=1"
       }
 
-      //otherwise, find the checked checkboxes
-      const checkboxes = document.querySelectorAll(".checkbox:checked")
-      //get the customer numbers
-      const customerNumbers = Array.from(checkboxes).map(checkbox => {
-        return checkbox.parentElement.parentElement.parentElement.querySelector("td:nth-child(2)").innerText
-      })
+      // Example validation for customerNumbers
+      const customerNumbers = Array.from(checkboxes).map((checkbox) => {
+        return checkbox.parentElement.parentElement.parentElement.querySelector(
+          'td:nth-child(2)'
+        ).innerText;
+      });
 
-      //TODO: create toaster to alert user that no customers were selected
       if (customerNumbers.length === 0) {
-        return
+        customAlert("No customers selected.");
+        return;
       }
-      
+    
       window.location.href = `/customers/delete?ids=${customerNumbers}`
     }
   </script>
