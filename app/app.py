@@ -225,7 +225,7 @@ def products_add():
 @app.route("/products/delete", methods=["GET"])
 def products_remove():
   delete_all = int(request.args.get("all", 0))
-  product_ids = request.args.get("ids", "")
+  product_ids = request.args.get("skus", "")
 
   # if product_ids == "":
   #   flash("Please select a product to remove")
@@ -273,6 +273,106 @@ def products_update():
     #   flash("Error updating product(s)")
 
   return redirect(url_for("products_index"))
+
+########################################################
+'''
+CREATE TABLE supplier(
+TIN VARCHAR(20) PRIMARY KEY,
+name VARCHAR(200),
+address VARCHAR(255),
+SKU VARCHAR(25) REFERENCES product,
+date DATE
+);
+'''
+@app.route("/suppliers", methods=["GET"])
+def suppliers_index():
+  #get filter arg from request
+  name_q = request.args.get("q", "")
+  page = int(request.args.get("page", 1))
+
+  if name_q == "":
+    #run query without filter
+    query = "SELECT * FROM supplier"
+    args = ()
+  else:
+    query = "SELECT * FROM supplier WHERE name ILIKE %s OR tin ILIKE %s"
+    args = (name_q, name_q)
+
+  suppliers = execute_query(query, args, action=FETCH_ALL)
+
+  #display 8 suppliers per page
+  max_page = (len(suppliers) // 8)
+  if len(suppliers) % 8 != 0:
+    max_page += 1
+  # if len(suppliers) == 0:
+  #   max_page = 1
+
+  suppliers = suppliers[(page-1)*8:page*8]
+
+  return render_template(
+    "/suppliers/index.html",
+    navbar_text="Suppliers",
+    current_q=name_q,
+    current_page=page,
+    max_page=max_page,
+    search_label="Search by tin or name..",
+    suppliers=suppliers
+  ) 
+
+@app.route("/suppliers/add", methods=["GET"])
+def suppliers_add():
+  random_no = randint(0, 999999)
+  tin = request.args.get("tin", random_no)
+  name = request.args.get("name", f"n-{random_no}")
+  address = request.args.get("address", "debug")
+  sku = request.args.get("sku", "d-251918")
+  date = request.args.get("date", "2020-01-01")
+
+  # if tin is None or name is None or address is None or sku is None or date is None:
+  #   flash("Please fill out all fields")
+
+  #create query
+  query = "INSERT INTO supplier (tin, name, address, sku, date) VALUES (%s, %s, %s, %s, %s)"
+  args = (tin, name, address, sku, date)
+
+  #insert customer into db
+  sucessfull = execute_query(query, args, action=INSERT_REMOVE)
+  # if not sucessfull:
+  #   flash("Error inserting customer")
+  
+  #render main_page
+  return redirect(url_for("suppliers_index"))
+
+@app.route("/suppliers/delete", methods=["GET"])
+def suppliers_remove():
+  delete_all = int(request.args.get("all", 0))
+  tins = request.args.get("tins", "")
+
+  # if tins == "":
+  #   flash("Please select a supplier to remove")
+  #   return redirect(url_for("suppliers_index"))
+
+  #if delete_all is true, delete all customers
+  if delete_all == 1:
+    query = "DELETE FROM supplier"
+    args = ()
+  else:
+    #parse ids
+    tins = tuple(tins.split(","))
+    placeholders = ", ".join(["%s"] * len(tins))
+
+    query = f"DELETE FROM supplier WHERE tin IN ({placeholders})"
+    args = tins
+
+  #execute query
+  sucessfull = execute_query(query, args, action=INSERT_REMOVE)
+
+  # if not sucessfull:
+  #   flash("Error deleting supplier(s)")
+  
+  #render main_page
+  return redirect(url_for("suppliers_index"))
+
 
 @app.route("/ping", methods=("GET",))
 def ping():

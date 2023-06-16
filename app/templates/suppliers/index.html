@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% import "components/table.html" as table %}
+{% import "components/button.html" as button %}
+{% import "components/pagination.html" as pagination %}
+
+
+{% block header %}
+{% endblock %}
+
+{% block content %}
+<div class="px-6 pt-10 w-full">
+  <div class="flex mb-4 space-x-3">
+    <!-- render add button -->
+    {{button.render(
+      "Add",
+      "M12 4.5v15m7.5-7.5h-15",
+      "create_supplier_modal.showModal()"
+      )}}
+      
+      <!-- render delete button -->
+      {{button.render(
+        "Delete",
+        "M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244
+        2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114
+      1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32
+      0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0",
+      "deleteSupplier()"
+      )}}
+
+      <!-- render pagination controllers -->
+      {{pagination.render(current_page, max_page)}}
+    </div>
+
+    <!-- Render Customers table -->
+    {{ table.render(suppliers, [
+      "TIN",
+      "Name",
+      "Address",
+      "SKU",
+      "Date"
+    ]) }}
+  </div>
+
+  
+  <!-- Add Customer Modal-->
+  <dialog id="create_supplier_modal" class="modal">
+    <form method="dialog" class="modal-box space-y-4">
+      <h1>Add Supplier</h1>
+      <div>
+        <label class="label">
+          <span class="label-text">TIN</span>
+        </label>
+        <input id="modal_tin" type="text" placeholder="ex: 288907222" class="input input-bordered w-full max-w-xs" />
+      </div>
+      <div>
+        <label class="label">
+          <span class="label-text">Name</span>
+        </label>
+        <input id="modal_name" type="text" placeholder="ex: Amazon" class="input input-bordered w-full max-w-xs" />
+      </div>
+      <div>
+        <label class="label">
+          <span class="label-text">Address</span>
+        </label>
+        <input id="modal_address" type="text" placeholder="ex: Chiado Warehouses" class="input input-bordered w-full max-w-xs" />
+      </div>
+      <div>
+        <label class="label">
+          <span class="label-text">SKU</span>
+        </label>
+        <input id="modal_sku" type="text" placeholder="ex: AE8H" class="input input-bordered w-full max-w-xs" />
+      </div>
+      <div>
+        <label class="label">
+          <span class="label-text">Date</span>
+        </label>
+        <input id="modal_date" type="text" placeholder="ex: 2023-06-16" class="input input-bordered w-full max-w-xs" />
+      </div>
+      <div class="modal-action">
+        <!-- if there is a button in form, it will close the modal -->
+        <button class="btn" onclick="addSupplier()">Add</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Actions logic -->
+  <script>
+    const addSupplier = () => {
+      //get modal input values
+      const tin = document.getElementById("modal_tin").value
+      const name = document.getElementById("modal_name").value
+      const address = document.getElementById("modal_address").value
+      const sku = document.getElementById("modal_sku").value
+      const date = document.getElementById("modal_date").value
+
+      window.location.href = `/suppliers/add?tin=${tin}&name=${name}&address=${address}&sku=${sku}&date=${date}`
+    }
+
+    const deleteSupplier = () => {
+      //check if the first checkbox is checked
+      const firstCheckbox = document.querySelector(".checkbox")
+      if (firstCheckbox.checked) {
+        window.location.href = "/suppliers/delete?all=1"
+      }
+
+      //otherwise, find the checked checkboxes
+      const checkboxes = document.querySelectorAll(".checkbox:checked")
+      //get the supplier numbers
+      const supplierNumbers = Array.from(checkboxes).map(checkbox => {
+        return checkbox.parentElement.parentElement.parentElement.querySelector("td:nth-child(2)").innerText
+      })
+
+      //TODO: create toaster to alert user that no customers were selected
+      if (supplierNumbers.length === 0) {
+        return
+      }
+      
+      window.location.href = `/suppliers/delete?tins=${supplierNumbers}`
+    }
+  </script>
+{% endblock %}
