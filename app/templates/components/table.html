@@ -5,11 +5,11 @@
       <tr>
         <th>
           <label>
-            <input type="checkbox" class="checkbox" />
+            <input type="checkbox" class="checkbox" onchange="checkAll(this)" />
           </label>
         </th>
         {% for label in labels %}
-        <th>{{label}}</th>
+        <th>{{ label }}</th>
         {% endfor %}
         <th></th>
       </tr>
@@ -26,7 +26,7 @@
           <div class="flex items-center space-x-3">
             <div class="avatar">
               <div class="mask mask-squircle w-12 h-12">
-                <img src="{{ url_for('static', filename='profile.jpg') }}" alt="avatar" />
+                <img src="{{ url_for('static', filename='placeholder.png') }}" alt="avatar" />
               </div>
             </div>
             <div>
@@ -43,11 +43,22 @@
       <tr>
         <th></th>
         {% for label in labels %}
-        <th>{{label}}</th>
+        <th>{{ label }}</th>
         {% endfor %}
         <th></th>
       </tr>
     </tfoot>
   </table>
 </div>
+
+<script>
+  function checkAll(source) {
+    var checkboxes = document.getElementsByClassName('checkbox');
+    for (var i = 0; i < checkboxes.length; i++) {
+      if (checkboxes[i] !== source) {
+        checkboxes[i].checked = source.checked;
+      }
+    }
+  }
+</script>
 {% endmacro %}

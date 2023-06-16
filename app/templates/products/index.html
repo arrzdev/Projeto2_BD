@@ -3,18 +3,18 @@
 {% import "components/button.html" as button%}
 {% import "components/pagination.html" as pagination %}
 
-{% block header %}
-{% endblock %}
+{% block title %}Products{% endblock %}
 
 {% block content %}
 <div class="px-6 pt-10 w-full">
   <div class="flex mb-4 space-x-3">
-    <!-- render add button -->
-    {{button.render(
-      "Add",
-      "M12 4.5v15m7.5-7.5h-15",
-      "create_product_modal.showModal()"
-      )}}
+    <div class="mr-auto">
+      <!-- render add button -->
+      {{button.render(
+        "Add",
+        "M12 4.5v15m7.5-7.5h-15",
+        "create_product_modal.showModal()"
+        )}}
       
       <!-- render delete button -->
       {{button.render(
@@ -35,19 +35,29 @@
         "createEditProductModal()"
       )}}
 
+      <!-- render order button -->
+      {{button.render(
+        "Order",
+        "M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684
+        2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75
+        0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z",
+        "orderProducts()"
+      )}}
+    </div>
+    <div class="ml-auto">
       <!-- render pagination controllers -->
       {{pagination.render(current_page, max_page)}}
     </div>
-
-    <!-- Render Customers table -->
-    {{ table.render(products, [
-      "SKU",
-      "Name",
-      "Description",
-      "Price",
-      "EAN"
-    ]) }}
   </div>
+  <!-- Render Customers table -->
+  {{ table.render(products, [
+    "SKU",
+    "Name",
+    "Description",
+    "Price",
+    "EAN"
+  ])}}
+</div>
   
   <!-- Add Product Modal -->
   <dialog id="create_product_modal" class="modal">
@@ -107,7 +117,6 @@
       //check if the first checkbox is checked
       if (checkboxes[0].checked) {
         toEditRows = Array.from(rows).slice(1, -1)
-        console.log(toEditRows)
       }
       else {
         toEditRows = Array.from(rows).slice(1, -1).filter((row, index) => {
@@ -243,7 +252,6 @@
         return
       }
 
-      console.log(`/products/update?skus=${skuArray}&descriptions=${descriptionArray}&prices=${priceArray}`)
       window.location.href = `/products/update?skus=${skuArray}&descriptions=${descriptionArray}&prices=${priceArray}`
     }
 
@@ -258,14 +266,6 @@
       if (!sku || !name || !description || !price || !ean) {
         return
       }
-      
-      // if (!Number.isInteger(price)) {
-      //   return
-      // }
-
-      // if (!Number.isInteger(ean)) {
-      //   return
-      // }
     
       //redirect to add customer endpoint
       window.location.href = `/products/add?sku=${sku}&name=${name}&description=${description}&price=${price}&ean=${ean}`
@@ -292,5 +292,35 @@
       
       window.location.href = `/products/delete?skus=${productNumbers}`
     }
+
+    const orderProducts = () => {
+      const checkboxes = document.querySelectorAll(".checkbox")
+      const rows = document.querySelectorAll("tr")
+
+      var toAddProductRows = []
+      //check if the first checkbox is checked
+      if (checkboxes[0].checked) {
+        toAddProductRows = Array.from(rows).slice(1, -1)
+      }
+      else {
+        toAddProductRows = Array.from(rows).slice(1, -1).filter((row, index) => {
+          return checkboxes[index + 1].checked
+        })
+      }
+
+      //if no product is selected, return
+      if (toAddProductRows.length === 0) {
+        return
+      }
+
+      const skus = toAddProductRows.map(row => row.querySelector("td:nth-child(2)").innerText)
+      const names = toAddProductRows.map(row => row.querySelector("td:nth-child(3)").innerText)
+      const descriptions = toAddProductRows.map(row => row.querySelector("td:nth-child(4)").innerText)
+      const prices = toAddProductRows.map(row => row.querySelector("td:nth-child(5)").innerText)
+      const eans = toAddProductRows.map(row => row.querySelector("td:nth-child(6)").innerText)
+      
+      window.location.href = `/order?skus=${skus}&names=${names}&descriptions=${descriptions}&prices=${prices}&eans=${eans}`
+    }
+
   </script>
 {% endblock %}

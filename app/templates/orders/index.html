@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% import "components/table.html" as table %}
+{% import "components/button.html" as button %}
+{% import "components/pagination.html" as pagination %}
+
+{% block title %}Orders{% endblock %}
+
+{% block content %}
+<div class="px-6 pt-10 w-full">
+  <div class="flex mb-4 space-x-3">
+    <div class="mr-auto">
+      <!-- render add button -->
+      {{button.render(
+        "Checkout",
+        "M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684
+        2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75
+        0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z",
+        "checkout()"
+      )}}
+    </div>
+    <div class="ml-auto">
+      <!-- render pagination controllers -->
+      {{pagination.render(current_page, max_page)}}
+    </div>
+  </div>
+
+  <!-- Render Customers table -->
+  {{ table.render(orders, [
+    "Order Number",
+    "Customer Number",
+    "Date",
+    "Status"
+  ]) }}
+</div>
+
+  <!-- Actions logic -->
+  <script>
+    const checkout = () => {
+      //check if the first checkbox is checked
+      const firstCheckbox = document.querySelector(".checkbox")
+      if (firstCheckbox.checked) {
+        console.log("Cannot checkout multiple orders")
+        return
+      }
+
+      //otherwise, find the checked checkboxes
+      const checkboxes = document.querySelectorAll(".checkbox:checked")
+
+      //get the order numbers
+      const orderNumbers = Array.from(checkboxes).map(checkbox => {
+        return checkbox.parentElement.parentElement.parentElement.querySelector("td:nth-child(2)").innerText
+      })
+
+      //get the customer numbers
+      const customerNumbers = Array.from(checkboxes).map(checkbox => {
+        return checkbox.parentElement.parentElement.parentElement.querySelector("td:nth-child(3)").innerText
+      })
+
+      //get status
+      const statuses = Array.from(checkboxes).map(checkbox => {
+        return checkbox.parentElement.parentElement.parentElement.querySelector("td:nth-child(5)").innerText
+      })
+
+
+      //TODO: create toaster to alert user that no customers were selected
+      if (orderNumbers.length !== 1) {
+        return
+      }
+
+      const orderNumber = orderNumbers[0]
+      const customerNumber = customerNumbers[0]
+      const status = statuses[0]
+
+      if (status === "Paid") {
+        console.log("Cannot checkout paid order")
+        return
+      }
+
+      window.location.href = `/order?order_no=${orderNumber}&cust_no=${customerNumber}`
+    };
+  </script>
+{% endblock %}
