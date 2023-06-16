@@ -127,27 +127,27 @@
 
       // Create the form element
       var form = document.createElement('form');
-      form.className = 'modal-box space-y-4';
+      form.method = 'dialog';
+      form.className = 'modal-box space-y-2';
 
       // Iterate over the rows
-      Array.from(rows).slice(1, -1).forEach(function (row) {
+      toEditRows.forEach(function (row) {
         const sku = row.children[1].textContent;
         const description = row.children[3].textContent;
         const price = row.children[4].textContent;
 
-        // Create the div container for each product
-        var productDiv = document.createElement('div');
-        productDiv.className = 'mb-10 space-y-1';
+        // Create the div container
+        var container = document.createElement('div');
+        container.className = 'mb-10';
 
         // Create the heading element
         var heading = document.createElement('h1');
         heading.id = 'modal_sku';
-        heading
         heading.textContent = 'Product ' + sku;
 
         // Create the description input element
         var descriptionLabel = document.createElement('label');
-        descriptionLabel.className = 'label';
+        descriptionLabel.className = 'label mt-4';
 
         var descriptionLabelText = document.createElement('span');
         descriptionLabelText.className = 'label-text';
@@ -164,7 +164,7 @@
 
         // Create the price input element
         var priceLabel = document.createElement('label');
-        priceLabel.className = 'label';
+        priceLabel.className = 'label mt-2';
 
         var priceLabelText = document.createElement('span');
         priceLabelText.className = 'label-text';
@@ -179,15 +179,15 @@
 
         priceLabel.appendChild(priceLabelText);
 
-        // Append all elements to the product div
-        productDiv.appendChild(heading);
-        productDiv.appendChild(descriptionLabel);
-        productDiv.appendChild(descriptionInput);
-        productDiv.appendChild(priceLabel);
-        productDiv.appendChild(priceInput);
+        // Append all elements to the container
+        container.appendChild(heading);
+        container.appendChild(descriptionLabel);
+        container.appendChild(descriptionInput);
+        container.appendChild(priceLabel);
+        container.appendChild(priceInput);
 
-        // Append the product div to the form
-        form.appendChild(productDiv);
+        // Append the container to the form
+        form.appendChild(container);
       });
 
       // Create the modal action div
@@ -238,7 +238,12 @@
         descriptionArray.push(description);
         priceArray.push(price);
       });
+      
+      if (skuArray.length === 0 || descriptionArray.length === 0 || priceArray.length === 0) {
+        return
+      }
 
+      console.log(`/products/update?skus=${skuArray}&descriptions=${descriptionArray}&prices=${priceArray}`)
       window.location.href = `/products/update?skus=${skuArray}&descriptions=${descriptionArray}&prices=${priceArray}`
     }
 
