@@ -64,6 +64,14 @@ def execute_query(query, args=(), action=INSERT_REMOVE):
 
   return result
 
+def get_max_page(nentrys, items_per_page):
+  #display n items_per_page 
+  max_page = (nentrys // items_per_page)
+  if nentrys % 8 != 0:
+    max_page += 1
+  if nentrys == 0:
+    max_page = 1
+  return max_page
 
 @app.route("/", methods=["GET"])
 def index():
@@ -73,6 +81,7 @@ def index():
 
 ########################################################
 
+# MANAGE CUSTOMERS
 @app.route("/customers", methods=["GET"])
 def customers_index():
   #get filter arg from request
@@ -90,9 +99,7 @@ def customers_index():
   customers = execute_query(query, args, action=FETCH_ALL)
 
   #display 8 customers per page
-  max_page = (len(customers) // 8)
-  if len(customers) % 8 != 0:
-    max_page += 1
+  max_page = get_max_page(len(customers), 8)
   customers = customers[(page-1)*8:page*8]
 
   return render_template(
@@ -163,6 +170,7 @@ def customers_remove():
 
 ########################################################
 
+# MANAGE PRODUCTS
 @app.route("/products", methods=["GET"])
 def products_index():
   #get filter arg from request
@@ -180,9 +188,7 @@ def products_index():
   products = execute_query(query, args, action=FETCH_ALL)
 
   #display 8 products per page
-  max_page = (len(products) // 8)
-  if len(products) % 8 != 0:
-    max_page += 1
+  max_page = get_max_page(len(products), 8)
   products = products[(page-1)*8:page*8]
 
   return render_template(
@@ -194,7 +200,6 @@ def products_index():
     search_label="Search by name or sku..",
     products=products
   )
-
 
 # ADD PRODUCT
 @app.route("/products/add", methods=["GET"])
@@ -275,15 +280,8 @@ def products_update():
   return redirect(url_for("products_index"))
 
 ########################################################
-'''
-CREATE TABLE supplier(
-TIN VARCHAR(20) PRIMARY KEY,
-name VARCHAR(200),
-address VARCHAR(255),
-SKU VARCHAR(25) REFERENCES product,
-date DATE
-);
-'''
+
+# MANAGE SUPPLIERS
 @app.route("/suppliers", methods=["GET"])
 def suppliers_index():
   #get filter arg from request
@@ -301,12 +299,7 @@ def suppliers_index():
   suppliers = execute_query(query, args, action=FETCH_ALL)
 
   #display 8 suppliers per page
-  max_page = (len(suppliers) // 8)
-  if len(suppliers) % 8 != 0:
-    max_page += 1
-  # if len(suppliers) == 0:
-  #   max_page = 1
-
+  max_page = get_max_page(len(suppliers), 8)
   suppliers = suppliers[(page-1)*8:page*8]
 
   return render_template(
@@ -319,6 +312,7 @@ def suppliers_index():
     suppliers=suppliers
   ) 
 
+# ADD SUPPLIER
 @app.route("/suppliers/add", methods=["GET"])
 def suppliers_add():
   random_no = randint(0, 999999)
@@ -343,6 +337,7 @@ def suppliers_add():
   #render main_page
   return redirect(url_for("suppliers_index"))
 
+# REMOVE SUPPLIER
 @app.route("/suppliers/delete", methods=["GET"])
 def suppliers_remove():
   delete_all = int(request.args.get("all", 0))
