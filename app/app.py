@@ -195,11 +195,12 @@ def product_index():
 # ADD PRODUCT
 @app.route("/products/add", methods=["GET"])
 def product_add():
-  sku = request.args.get("sku", "debug")
-  name = request.args.get("name", "debug")
+  random_no = randint(0, 999999)
+  sku = request.args.get("sku", f"d-{random_no}")
+  name = request.args.get("name", f"n-{random_no}")
   description = request.args.get("description", "debug")
   price = request.args.get("price", 0)
-  ean = request.args.get("ean", 0)
+  ean = request.args.get("ean", random_no)
 
   # if sku is None or name is None or description is None or price is None or ean is None:
     # flash("Please fill out all fields")
@@ -232,10 +233,10 @@ def product_remove():
     args = ()
   else:
     #parse ids
-    product_ids = tuple(map(int, product_ids.split(",")))
+    product_ids = tuple(product_ids.split(","))
     placeholders = ", ".join(["%s"] * len(product_ids))
 
-    query = f"DELETE FROM product WHERE cust_no IN ({placeholders})"
+    query = f"DELETE FROM product WHERE sku IN ({placeholders})"
     args = product_ids
 
   #execute query
